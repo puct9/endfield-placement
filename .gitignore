@@ -1,0 +1,11 @@
+*
+
+!.gitignore
+!README.md
+
+!conveyors.py
+!vis.ipynb
+!output.txt
+
+!*.dzn
+!placement.mzn

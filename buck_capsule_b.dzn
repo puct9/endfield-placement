@@ -1,0 +1,13 @@
+GRIDRANGE_X = 0..40;
+GRIDRANGE_Y = 0..11;
+
+BUILDING = { RU1, RU2, RU3, RU4, MOULD1, MOULD2, SEED1, PLANT1, PLANT2, SHR1, FILL1 };
+NS_WIDTH = [   3,   3,   3,   3,      3,      3,     5,      5,      5,    3,     6 ];
+EW_WIDTH = [   3,   3,   3,   3,      3,      3,     5,      5,      5,    3,     4 ];
+
+CONVEYOR_FROM = [ <>,  <>,  <>,  <>,    RU1,    RU2,    RU3,    RU4,  SEED1,  SEED1, PLANT1, PLANT2,  SHR1,  SHR1, MOULD1, MOULD2];
+CONVEYOR_TO   = [RU1, RU2, RU3, RU4, MOULD1, MOULD1, MOULD2, MOULD2, PLANT1, PLANT2,  SEED1,   SHR1, FILL1, FILL1,  FILL1,  FILL1];
+
+PICKUP_X = [0, 0, 0,  0];
+PICKUP_Y = [1, 4, 7, 10];
+PICKUP_ORIENTATION = [EAST, EAST, EAST, EAST];
