@@ -6,3 +6,5 @@
 !minizinc/
 !minizinc/packing/
 !minizinc/packing/**
+!minizinc/flow/
+!minizinc/flow/**
