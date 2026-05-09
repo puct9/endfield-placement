@@ -20,7 +20,7 @@ array[BUILDING] of var int: building_dx = [if building_orientation[b] in {NORTH,
 array[BUILDING] of var int: building_dy = [if building_orientation[b] in {NORTH, SOUTH} then EW_WIDTH[b] else NS_WIDTH[b] endif | b in BUILDING];
 
 % This is implicitly captured in conveyor-building collisions
-% constraint diffn(building_x, building_y, building_dx, building_dy);
+constraint diffn(building_x, building_y, building_dx, building_dy);
 
 % Conveyor belt positions
 array[_] of opt BUILDING: CONVEYOR_FROM;
@@ -111,6 +111,30 @@ constraint forall(c in CONVEYORS)(
 constraint forall(c in CONVEYORS, b in BUILDING)(
   CONVEYOR_FROM[c] = b -> conveyor_orientation[c, 1] = building_orientation[b]
 );
+% Might be better?
+% constraint forall(c in CONVEYORS)(
+%   let {
+%     var opt BUILDING: b = CONVEYOR_FROM[c];
+%   } in occurs(b) -> conveyor_orientation[c, 1] = building_orientation[b]
+% );
+
+% Length 3 conveyor heuristic
+constraint forall(c in CONVEYORS)(
+  let { var int: conveyor_dy = conveyor_end_y[c] - conveyor_start_y[c]; } in
+  (conveyor_orientation[c, 1] in {EAST, WEST} /\ conveyor_dy != 0) ->
+    (
+      conveyor_length[c, 2] = 1 + abs(conveyor_dy) /\
+      conveyor_orientation[c, 2] = if conveyor_dy > 0 then NORTH else SOUTH endif
+    )
+);
+constraint forall(c in CONVEYORS)(
+  let { var int: conveyor_dx = conveyor_end_x[c] - conveyor_start_x[c]; } in
+  (conveyor_orientation[c, 1] in {NORTH, SOUTH} /\ conveyor_dx != 0) ->
+    (
+      conveyor_length[c, 2] = 1 + abs(conveyor_dx) /\
+      conveyor_orientation[c, 2] = if conveyor_dx > 0 then EAST else WEST endif
+    )
+);
 
 % Conveyors of length 1 represent a 1x1 block of conveyor. If I have a length 1 conveyor starting at (6, 7) then the next conveyor starts at (6, 7) too
 % That means the first conveyor should have length >= 1, and afterwards have length >= 2
@@ -118,12 +142,13 @@ constraint forall(c in CONVEYORS)(conveyor_length[c, 1] >= 1);
 constraint forall(c in CONVEYORS, t in 2..card(TURNS))(
   if t < conveyor_turns[c] then
     conveyor_length[c, t] >= 2
-  elseif t = conveyor_turns[c] then
+  elseif t = conveyor_turns[c] then % TODO: This is not necessary?
     conveyor_length[c, t] >= 1
   else
     conveyor_length[c, t] = 0 % Symmetry breaking
   endif
 );
+% TODO: I think this is not required
 constraint forall(c in CONVEYORS)(conveyor_orientation[c, conveyor_turns[c]] = building_orientation[CONVEYOR_TO[c]]);
 
 % Track conveyor absolute positions
@@ -219,4 +244,21 @@ constraint obj = card(CONVEYORS) + sum(c in CONVEYORS, t in TURNS)(
     0
   endif
 );
-solve minimize obj;
+constraint obj >= sum(c in CONVEYORS)(
+  abs(conveyor_start_x[c] - conveyor_end_x[c]) +
+  abs(conveyor_start_y[c] - conveyor_end_y[c]) +
+  1
+);
+% solve minimize obj;
+
+solve :: seq_search([
+    int_search(building_x, first_fail, indomain_min),
+    int_search(building_y, first_fail, indomain_min),
+    int_search(array1d(conveyor_length), smallest, indomain_min)
+]) minimize obj;
+
+
+
+
+
+
