@@ -8,3 +8,6 @@
 !minizinc/packing/**
 !minizinc/flow/
 !minizinc/flow/**
+
+!ortcpsat/
+!ortcpsat/*
