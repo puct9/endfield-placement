@@ -1,3 +1,6 @@
+import numpy as np
+from einops import rearrange
+
 LC_VALLEY_BATTERY_CONVEYOR = [
     (None, "SHR1"),
     (None, "SHR2"),
@@ -21,7 +24,6 @@ SC_VALLEY_BATTERY_CONVEYOR = [
     ("FU1", "PACKU1"),
     ("FU2", "PACKU1"),
 ]
-
 BUCK_CAPSULE_B_CONVEYOR = [
     (None, "RU1"),
     (None, "RU2"),
@@ -40,7 +42,6 @@ BUCK_CAPSULE_B_CONVEYOR = [
     ("MOULD1", "FILL1"),
     ("MOULD2", "FILL1"),
 ]
-
 HC_VALLEY_BATTERY_CONVEYOR = [
     (None, "SHR1"),
     (None, "SHR2"),
@@ -89,7 +90,6 @@ HC_VALLEY_BATTERY_CONVEYOR = [
     ("FU1", "PACKU1"),
     ("FU2", "PACKU1"),
 ]
-
 BUCK_CAPSULE_A_CONVEYOR = [
     (None, "RU1"),
     (None, "RU2"),
@@ -154,3 +154,37 @@ BUCK_CAPSULE_A_CONVEYOR = [
     ("GRIND5", "FILL1"),
     ("GRIND6", "FILL1"),
 ]
+
+LC_VALLEY_BATTERY_BUILDING = ["SHR1", "SHR2", "RU1", "FU1", "PACKU1"]
+
+
+def arcs(max_x, max_y):
+    grid_horiz = np.arange(max_x * max_y).reshape(max_y, max_x) + 1
+    grid_vert = grid_horiz + max_x * max_y
+
+    def permute(arr):
+        return rearrange(arr, "t ... -> (...) t", t=2)
+
+    horizontal_edges = permute(np.stack([grid_horiz[:, :-1], grid_horiz[:, 1:]]))
+    vertical_edges = permute(np.stack([grid_vert[:-1], grid_vert[1:]]))
+    transition_edges = permute(np.stack([grid_horiz, grid_vert]))
+
+    all_nodes = np.concat([grid_horiz, grid_vert]).flatten()
+    source_node = len(all_nodes) + 1
+    sink_node = len(all_nodes) + 2
+    source2all_edges = permute(np.stack([np.full_like(all_nodes, source_node), all_nodes]))
+    all2sink_edges = permute(np.stack([all_nodes, np.full_like(all_nodes, sink_node)]))
+
+    return np.concat(
+        [
+            horizontal_edges,
+            vertical_edges,
+            transition_edges,
+            source2all_edges,
+            all2sink_edges,
+        ]
+    )
+
+
+LC_VALLEY_BATTERY_XY = 20, 9
+LC_VALLEY_BATTERY_ARC = arcs(*LC_VALLEY_BATTERY_XY)
