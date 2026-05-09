@@ -3,9 +3,6 @@
 !.gitignore
 !README.md
 
-!constants.py
-!vis.ipynb
-!output.txt
-
-!*.dzn
-!placement.mzn
+!minizinc/
+!minizinc/packing/
+!minizinc/packing/**

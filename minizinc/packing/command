@@ -1,0 +1,2 @@
+minizinc placement.mzn buckflower_capsual_b.dzn --solver cp-sat --parallel 10 --intermediate --output-time --output-to-file inters.txt
+minizinc placement_flow.mzn lc_valley_battery_flow.dzn --solver cp-sat --parallel 10 --output-mode json --output-time --output-to-file output_flow.json
